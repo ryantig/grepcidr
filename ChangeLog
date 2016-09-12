@@ -1,0 +1,74 @@
+Version 2.991
+============
+
+- Add -D for partial range matching
+- Fix minor bugs
+- More extensive debugging info incuded with -DDEBUG
+
+Version 2.99
+============
+
+- Add -C to match CIDR ranges in the input
+
+Version 2.98
+===========
+
+- Make 0.0.0.0/0 work
+- Replace fgets() with getline() so it can handle arbitrary line
+  lengths in non-mmap files
+- Twiddle state machine so ::::ffff:1.2.3.4 and ::::1 are recognized
+  as IPv6
+- Match IPv6 after 8 groups so 1:2:3:4:5:6:7:8:junk works
+- Fix bug that allowed oversize values in first v6 group
+- Peek after last colon in low group so 1::2:junk works
+
+Version 2.97
+===========
+
+- Quick flag doesn't recognize v4 with dots before or after, to limit
+  false matches in rDNS names
+
+Version 2.96
+===========
+
+- New -s flag to stop comlaints about sloppy (misaligned CIDRs)
+- CIDRs now always properly bit aligned, even if the base address wasn't
+- Minor bug fixes
+
+Version 2.95
+===========
+
+- Rewritten to use a faster state machine recognizer and mapped files,
+  about 3 times faster overall, no speed penalty for matching through
+  the whole line
+- Handles both IPv4 and IPv6 patterns
+- Better error checking
+- Handle multiple input files
+
+Version 1.3
+===========
+- Much faster than past versions due to binary search of patterns
+- Decreased memory usage
+- Applied search improvements suggested by Dick Wesseling <ftu@fi.uu.nl>
+- Now supports IP ranges as well as CIDR format
+- Improved usage to be more grep-like (e.g. filename on command line)
+- Now uses grep-like exit code (0=ok, 1=no match, 2=error)
+
+
+Version 1.2
+===========
+- Improved algorithm for faster processing with large number of patterns
+  (approx. 50 times as fast on test set, with specs from diverse regions)
+
+
+version 1.1
+===========
+- New algorithm has increased speed by about 2.4 times!
+- Added -c (count) option, like grep
+- Reduced memory usage in case loading large files (-f)
+- Added simple Makefile
+
+
+version 1.0
+===========
+- First public release

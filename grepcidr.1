@@ -1,0 +1,131 @@
+.TH "GREPCIDR" "1" 
+.SH "NAME" 
+grepcidr \(em Filter IP addresses matching IPv4 and IPv6 address specifications
+.SH "SYNOPSIS" 
+.PP 
+\fBgrepcidr\fR [\fB-V\fP]  [\fB-cCDvahisq\fP]  \fIPATTERN\fP [\fIFILE ...\fP]  
+.PP 
+\fBgrepcidr\fR [\fB-V\fP]  [\fB-cCDvahisq\fP] [\fB-e \fIPATTERN\fR\fP | \fB-f \fIFILE\fP]  [\fIFILE ...\fP]
+.SH "DESCRIPTION" 
+.PP 
+\fBgrepcidr\fR can be used to filter a list of IP addresses and ranges against one or more 
+IPv4 and IPv6 address ranges.  As with grep, there are options to invert 
+matching and load patterns from a file.  grepcidr is designed to scale well,
+and handle large numbers of patterns and large input files efficiently.
+This version uses a completely rewritten parser that is typically two or three times
+faster than previous versions.
+.\" 
+.SH "OPTIONS" 
+.IP "\fB-V\fP" 10 
+Show software version 
+.IP "\fB-c\fP" 10 
+Display count of the lines that otherwise would have been printed
+.IP "\fB-v\fP" 10 
+Invert the sense of matching, to select lines with IPs that don't match any pattern
+.IP "\fB-a\fP" 10 
+(anchor) Only match addresses that occur at the beginning of a line
+.IP "\fB-e\fP" 10 
+Specify pattern(s) as an argument
+.IP "\fB-f\fP" 10 
+Obtain pattern(s) from a file 
+.IP "\fB-h\fP" 10 
+Do not print file names with matched lines
+.IP "\fB-i\fP" 10 
+Ignore bad patterns
+.IP "\fB-s\fP" 10 
+(Sloppy) Don't complain about misaligned CIDR ranges.
+.IP "\fB-C\fP" 10 
+Parse CIDR ranges in input and match if a search term covers the entire range.
+.IP "\fB-D\fP" 10 
+Parse CIDR ranges in input and match if a search term covers any of the range.
+.IP "\fB-q\fP" 10 
+(Quick) Ignore IPv4 addresses that are followed by a dot.
+.SH "USAGE NOTES" 
+.PP 
+PATTERN specified on the command line may contain multiple patterns 
+separated by whitespace or commas. For long lists of network patterns, 
+use \fB-f\fP to load a file where each line contains one pattern. Comment 
+lines starting with # are ignored.
+In a file, each pattern can be followed by a space and comments.
+.PP 
+Each pattern, whether on the command line or inside a file, may be: 
+.PP 
+.nf 
+a.b.c.d/xx        (IPv4 CIDR range) 
+a.b.c.d-e.f.g.h   (IPv4 range) 
+a.b.c.d           (Single IPv4 address)
+ab:cd::ef	  (Single IPv6 address)
+ab:cd::ef/xx	  (IPv6 CIDR range)
+ab::cd:a.b.c.d	  (IPv4 address embedded in IPv6)
+.fi 
+.PP
+Invalid patterns are ignored with the \fB-i\fP flag, which can be useful for
+using files of IPs or CIDRs as patterns that also contain other material.
+CIDRs are always properly aligned even if the base address wasn't, e.g.,
+12.34.56.78/24 is treated as 12.34.56.0/24,
+and 1234:5678::abcd/64 is treated as 1234:5678::0/64.
+Complaints about misaligned CIDRs can be suppressed with \fB-s\fP.
+.SH COMPATIBILITY
+.PP 
+In version 2.9 \fBgrepcidr\fR normally searches for IP addresses anywhere 
+on the input line.
+It uses a reasonable but ad-hoc parser to look for the begining of an address.
+This can cause unexpected results in some cases, e.g. ab:c12.34.56.78 will not
+match as an IPv4 address because ab:c12 looks like the beginning of an IPv6
+address.
+Addresses written as IPv6 embedded IPv4 addresses will match either the IPv4
+or IPv6 address pattern, e.g. ::ffff:12.34.56.78 will match both ::ffff:0/96 and 12.34.0.0/16.
+.PP
+Even though :: is a valid way to write a zero IPv6 address, grepcidr won't match it.
+(If that's what you want, use regular grep.)
+It will match 0:: or ::0.0.0.0 or 0::0 or or any other form.
+.PP
+Normallly grepcidr will match every string that looks like
+an IPv4 address, so in 1.2.3.4.5.6.7.8 it will match
+both 1.2.3.4 and 5.6.7.8.
+The \fB-q\fP option ignores addresses preceded or followed by a dot,
+which avoids false matches in some contexts.
+.PP 
+Use the \fB-a\fP option to look for addresses only at the
+start of the line, optionally preceded by whitespace.
+This type of search is stricter, but not significantly faster.
+.PP 
+Note that \fB-v\fP outputs only lines that do contain IP addresses, but do not match
+any of the patterns.
+.PP
+If there is more than one file named on the command line, each matched line
+is preceded by the file name unless the \fR-h\fP flag is set.
+.SH "EXAMPLES" 
+.PP 
+\fI\fBgrepcidr\fR \-f ournetworks blacklist > abuse.log\fP 
+.PP 
+Find customers (CIDR ranges in file) that appear in blacklist 
+.PP 
+\fI\fBgrepcidr\fR 127.0.0.0/8,::1 iplog\fP 
+.PP 
+Searches for any localnet IP addresses inside the iplog file 
+.PP 
+\fI\fBgrepcidr\fR "192.168.0.1-192.168.10.13" iplog\fP
+.br
+\fI\fBgrepcidr\fR "2001:3def:1234::/48" iplog\fP 
+.PP 
+Searches for IPs matching indicated range in the iplog file 
+.PP 
+\fI\fBscript\fR | \fBgrepcidr\fR \-vf whitelist > blacklist\fP 
+.PP 
+Create a blacklist, with whitelisted networks removed (inverse) 
+.PP 
+\fI\fBgrepcidr\fR \-f list1 list2\fP 
+.PP 
+Cross-reference two lists, outputs IPs common to both lists 
+.SH "EXIT STATUS" 
+.PP 
+As with grep: the exit status is 0 if matching IPs are found, and 1 
+if not found.  If an error occurred the exit status is 2.  
+.SH "AUTHOR" 
+.PP 
+This software is based on software written by Jem Berkes <jem@berkes.ca>,
+extensively rewritten by John Levine <johnl@taugh.com>. 
+Permission is granted to copy, distribute and/or modify this document under 
+the terms of the GNU General Public License, Version 2 or any later version 
+published by the Free Software Foundation. 
