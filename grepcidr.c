@@ -18,7 +18,7 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  $Header: /Users/johnl/grepcidr-2.991/RCS/grepcidr.c,v 1.5 2015/10/25 15:11:06 johnl Exp $
+  $Header: /Users/johnl/grepcidr-2.992/RCS/grepcidr.c,v 1.5 2015/10/25 15:11:06 johnl Exp $
 */
 
 
@@ -37,7 +37,7 @@
 #define EXIT_NOMATCH	1
 #define EXIT_ERROR	2
 
-#define TXT_VERSION	"grepcidr 2.991\nParts copyright (C) 2004, 2005  Jem E. Berkes <jberkes@pc-tools.net>\n"
+#define TXT_VERSION	"grepcidr 2.992\nParts copyright (C) 2004, 2005  Jem E. Berkes <jberkes@pc-tools.net>\n"
 #define TXT_USAGE	"Usage:\n" \
 			"\tgrepcidr [-V] [-cCDvhais] PATTERN [FILE...]\n" \
 			"\tgrepcidr [-V] [-cCDvhais] [-e PATTERN | -f FILE] [FILE...]\n"
@@ -620,7 +620,7 @@ int netsort6(const void* a, const void* b)
 
 int main(int argc, char* argv[])
 {
-	static char shortopts[] = "acCDe:f:iqsvV";
+	static char shortopts[] = "acCDe:f:hiqsvV";
 	char* pat_filename = NULL;		/* filename containing patterns */
 	char* pat_strings = NULL;		/* pattern strings on command line */
 	int foundopt;
